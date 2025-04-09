@@ -1,0 +1,33 @@
+<configuration xmlns="urn:activemq:core">
+  <core>
+    <acceptors>
+      <acceptor name="artemis">tcp://0.0.0.0:61616</acceptor>
+    </acceptors> 
+    <addresses>
+      <address name="D11">
+        <anycast>
+          <queue name="TEST"/>          
+          <queue name="DOWNLOAD_WHOSCORED_MATCH"/>
+          <queue name="UPDATE_MATCH_REQUEST"/>
+          <queue name="UPDATE_MATCH"/>
+          <queue name="UPDATE_PLAYERS"/>
+          <queue name="UPDATE_PLAYER_PHOTOS_REQUEST"/>
+          <queue name="UPDATE_SQUADS_REQUEST"/>
+          <queue name="UPDATE_SQUAD"/>          
+          <queue name="INSERT_TRANSFER_WINDOW"/>  
+        </anycast>
+      </address>
+    </addresses>
+    <security-settings>
+      <security-setting match="D11.#">
+        <permission type="createNonDurableQueue" roles="amq"/>
+        <permission type="deleteNonDurableQueue" roles="amq"/>
+        <permission type="createDurableQueue" roles="amq"/>
+        <permission type="deleteDurableQueue" roles="amq"/>
+        <permission type="consume" roles="amq"/>
+        <permission type="send" roles="amq"/>
+        <permission type="manage" roles="amq"/>
+      </security-setting>
+    </security-settings>
+  </core>
+</configuration>

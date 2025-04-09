@@ -1,0 +1,79 @@
+services:
+  postgres:
+    image: postgres:17.4
+    container_name: postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=${PASSWORD}
+      - D11DBUSER_PASSWORD=${PASSWORD}
+      - TZ=Europe/Helsinki
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres:/docker-entrypoint-initdb.d
+    networks:
+      - d11
+
+  artemis:
+    image: apache/activemq-artemis:2.40.0
+    container_name: artemis
+    restart: unless-stopped
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+    environment:
+      - ARTEMIS_USER=d11-broker
+      - ARTEMIS_PASSWORD=${PASSWORD}
+      - ARTEMIS_ROLE=d11-broker=amq,admin
+      - ANONYMOUS_LOGIN=false
+    volumes:
+      - artemis_data:/var/lib/artemis-instance
+      - ./artemis:/var/lib/artemis-instance/etc-override
+    networks:
+      - d11
+
+  d11-boot:
+    build:
+      context: ./d11-boot
+    container_name: d11-boot
+    image: d11-boot:latest
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    environment:
+      - SPRING_PROFILES_ACTIVE=production
+      - JASYPT_ENCRYPTOR_PASSWORD=${PASSWORD}      
+    volumes:
+      - ${FILES_PATH}:/app/files
+      - ${LOG_PATH}:/app/log    
+    depends_on:
+      - postgres
+      - artemis
+    networks:
+      - d11
+
+  nginx:
+    image: nginx:1.27.4
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./public:/usr/share/nginx/html:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - d11-boot
+    networks:
+      - d11
+
+networks:
+  d11:
+    name: d11
+
+volumes:
+  postgres_data:
+    name: postgres_data
+  artemis_data:
+    name: artemis_data
+    
