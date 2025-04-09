@@ -15,6 +15,20 @@ services:
     networks:
       - d11
 
+  pg-backup:
+    build:
+      context: ./pg-backup
+    container_name: pg-backup
+    image: pg-backup:latest
+    depends_on:
+      - postgres
+    environment:
+      - PGPASSWORD=${PASSWORD}
+    volumes:
+      - ./pg-backup/backups:/backups
+    networks:
+      - d11
+
   artemis:
     image: apache/activemq-artemis:2.40.0
     container_name: artemis
