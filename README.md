@@ -76,3 +76,4 @@ Use the included scripts:
 Manual commands:
 - **docker exec pg-backup /scripts/backup.sh**: Manually trigger a backup
 - **docker exec pg-backup tail -n 50 /var/log/cron.log**: Check pg-backup cron log for errors. "No such file" means there hasn't been any errors.
+- **docker exec pg-backup psql -h postgres -U postgres -d d11 -f /backups/<filename>.sql**: Restore the database from a backup. The file must be present in the pg-backup /backups directory.
